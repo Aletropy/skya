@@ -1,5 +1,6 @@
 package com.aletropy.skya.data
 
+import com.aletropy.skya.events.BoundCampfireUpdateEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import java.io.File
@@ -22,7 +23,7 @@ class DatabaseManager(private val dataFolder : File)
         try {
             if (!dataFolder.exists())
                 dataFolder.mkdirs()
-            val dbFile = File(dataFolder, "skya_groups.db")
+            val dbFile = File(dataFolder, "skya.db")
             Class.forName("org.sqlite.JDBC")
             connection = DriverManager.getConnection("jdbc:sqlite:${dbFile.absolutePath}")
         } catch (e : Exception) {
@@ -57,19 +58,33 @@ class DatabaseManager(private val dataFolder : File)
         """
         val createCampfiresTable = """
             CREATE TABLE IF NOT EXISTS bound_campfires (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 world TEXT NOT NULL,
                 x INTEGER NOT NULL,
                 y INTEGER NOT NULL,
                 z INTEGER NOT NULL,
                 groupId INTEGER NOT NULL,
-                PRIMARY KEY (world, x, y, z),
                 FOREIGN KEY(groupId) REFERENCES groups(id) ON DELETE CASCADE
             );
         """
+        val createIslandsTable = """
+            CREATE TABLE IF NOT EXISTS islands (
+                world TEXT NOT NULL,
+                x INTEGER NOT NULL,
+                y INTEGER NOT NULL,
+                z INTEGER NOT NULL,
+                groupId INTEGER NOT NULL,
+                campfireId INTEGER NOT NULL,
+                PRIMARY KEY (world, x, y, z),
+                FOREIGN KEY(campfireId) REFERENCES groups(id) ON DELETE CASCADE
+                FOREIGN KEY(groupId) REFERENCES groups(id) ON DELETE CASCADE
+            );
+        """.trimIndent()
         connection?.createStatement()?.use { stmt ->
             stmt.execute(createGroupsTable)
             stmt.execute(createMembersTable)
             stmt.execute(createCampfiresTable)
+            stmt.execute(createIslandsTable)
         }
     }
 
@@ -150,6 +165,20 @@ class DatabaseManager(private val dataFolder : File)
         return getGroupById(groupId)
     }
 
+    fun getAllGroupMembers(groupId: Int) : List<String>
+    {
+        val uuids = mutableListOf<String>()
+        val sql = "SELECT playerUUID FROM group_members WHERE groupId = ?"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.setInt(1, groupId)
+            pstmt.executeQuery().use { rs ->
+                while(rs.next())
+                    uuids.add(rs.getString("playerUUID"))
+            }
+        }
+        return uuids
+    }
+
     fun storeBindedCampfire(location: Location, groupId: Int) {
         val sql = "INSERT INTO bound_campfires (world, x, y, z, groupId) VALUES (?, ?, ?, ?, ?)"
         connection?.prepareStatement(sql)?.use { pstmt ->
@@ -169,6 +198,19 @@ class DatabaseManager(private val dataFolder : File)
             pstmt.setInt(2, location.blockX)
             pstmt.setInt(3, location.blockY)
             pstmt.setInt(4, location.blockZ)
+            pstmt.executeQuery()?.use { rs ->
+                if (rs.next()) {
+                    return rs.toBoundCampfire()
+                }
+            }
+        }
+        return null
+    }
+
+    fun getCampfire(campfireId : Int): BoundCampfire? {
+        val sql = "SELECT * FROM bound_campfires WHERE id = ?"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.setInt(1, campfireId)
             pstmt.executeQuery()?.use { rs ->
                 if (rs.next()) {
                     return rs.toBoundCampfire()
@@ -203,20 +245,6 @@ class DatabaseManager(private val dataFolder : File)
         }
     }
 
-    fun getAllGroupMembers(groupId: Int) : List<String>
-    {
-        val uuids = mutableListOf<String>()
-        val sql = "SELECT playerUUID FROM group_members WHERE groupId = ?"
-        connection?.prepareStatement(sql)?.use { pstmt ->
-            pstmt.setInt(1, groupId)
-            pstmt.executeQuery().use { rs ->
-                while(rs.next())
-                    uuids.add(rs.getString("playerUUID"))
-            }
-        }
-        return uuids
-    }
-
     fun getAllBoundCampfires(): List<BoundCampfire> {
         val campfires = mutableListOf<BoundCampfire>()
         val sql = "SELECT * FROM bound_campfires"
@@ -228,6 +256,47 @@ class DatabaseManager(private val dataFolder : File)
             }
         }
         return campfires
+    }
+
+    fun storeIsland(island: Island)
+    {
+        val sql = "INSERT INTO islands (world, x, y, z, groupId, campfireId) VALUES (?, ?, ?, ?, ?, ?)"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.setString(1, island.location.world.name)
+            pstmt.setInt(2, island.location.blockX)
+            pstmt.setInt(3, island.location.blockY)
+            pstmt.setInt(4, island.location.blockZ)
+            pstmt.setInt(5, island.groupId)
+            pstmt.setInt(6, island.campfire?.id ?: -1)
+            pstmt.executeQuery()
+        }
+    }
+
+    fun getGroupIslands(groupId : Int) : List<Island>
+    {
+        val list = mutableListOf<Island>()
+        val sql = "SELECT * FROM islands WHERE groupId = ?"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.setInt(1, groupId)
+            pstmt.executeQuery().use { rs ->
+                while (rs.next())
+                    list.add(rs.toIsland())
+            }
+        }
+        return list
+    }
+
+    fun getAllIslands() : List<Island>
+    {
+        val list = mutableListOf<Island>()
+        val sql = "SELECT * FROM islands"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.executeQuery().use { rs ->
+                while (rs.next())
+                    list.add(rs.toIsland())
+            }
+        }
+        return list
     }
 
     private fun ResultSet.toGroup(): Group = Group(
@@ -247,6 +316,29 @@ class DatabaseManager(private val dataFolder : File)
             getInt("y").toDouble(),
             getInt("z").toDouble()
         )
-        return BoundCampfire(location, getInt("groupId"))
+        return BoundCampfire(getInt("id"), location, getInt("groupId"))
+    }
+
+    private fun ResultSet.toIsland(): Island {
+        val world = Bukkit.getWorld(getString("world"))
+            ?: throw IllegalStateException("World ${getString("world")} not found for island!")
+
+        val location = Location(
+            world,
+            getInt("x").toDouble(),
+            getInt("y").toDouble(),
+            getInt("z").toDouble()
+        )
+
+        val campfire = getCampfire(getInt("campfireId"))
+
+        return Island(location,getInt("groupId"), campfire)
+    }
+
+    fun addSkyEssenceToGroup(groupId: Int, amount : Int)
+    {
+        val group = getGroupById(groupId) ?: return
+        group.skyEssence += amount
+        updateGroup(group)
     }
 }

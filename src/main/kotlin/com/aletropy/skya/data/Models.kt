@@ -9,4 +9,6 @@ data class GroupInvite(val inviterUUID : UUID, val groupId : Int, val inviterGro
     System.currentTimeMillis())
 
 data class GroupMember(val playerUUID : String, val groupId : Int)
-data class BoundCampfire(val location : Location, val groupId : Int)
+data class BoundCampfire(val id : Int, val location : Location, val groupId : Int)
+
+data class Island(val location : Location, val groupId : Int, val campfire : BoundCampfire?)

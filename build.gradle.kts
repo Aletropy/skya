@@ -33,11 +33,12 @@ tasks {
         group = "deployment"
         description = "Deploys the plugin to the sandbox server."
         commandLine(
+            "wsl",
             "rsync",
             "-avz",
             "-e",
             "ssh",
-            "build/libs/Skya-0.1.1-all.jar",
+            "/mnt/n/Projects/skya/build/libs/Skya-0.1.1-all.jar",
             "sandbox-server:~/Server/plugins/Skya-0.1.1.jar"
         )
     }

@@ -2,6 +2,7 @@ package com.aletropy.skya.listeners
 
 import com.aletropy.skya.campfire.CampfireManager
 import com.aletropy.skya.data.DatabaseManager
+import com.aletropy.skya.events.BoundedCampfireEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.GameMode
@@ -18,7 +19,8 @@ import org.bukkit.event.player.PlayerInteractEvent
 class CampfireListener(private val dbManager : DatabaseManager, private val campfireManager: CampfireManager) : Listener
 {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    fun onCampfireBroken(event : BlockBreakEvent) {
+    fun onCampfireBroken(event : BlockBreakEvent)
+    {
         if(event.block.type != Material.CAMPFIRE && event.block.type != Material.SOUL_CAMPFIRE) return
 
         val player = event.player
@@ -36,9 +38,10 @@ class CampfireListener(private val dbManager : DatabaseManager, private val camp
         campfireManager.removeCampfire(event.block.location)
     }
 
+
     @EventHandler
     fun onCampfireExploded(event : BlockExplodeEvent) {
-        if(event.block.type != Material.CAMPFIRE && event.block.type != Material.SOUL_CAMPFIRE) return
+        if(event.explodedBlockState.type != Material.CAMPFIRE && event.explodedBlockState.type != Material.SOUL_CAMPFIRE) return
         campfireManager.removeCampfire(event.block.location)
     }
 

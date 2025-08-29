@@ -8,6 +8,7 @@ import com.aletropy.skya.listeners.CampfireListener
 import com.aletropy.skya.listeners.PlayerEvents
 import com.aletropy.skya.group.GroupManager
 import com.aletropy.skya.group.InviteManager
+import com.aletropy.skya.island.IslandManager
 import com.aletropy.skya.listeners.DataListener
 import com.aletropy.skya.listeners.GroupListener
 import org.bukkit.event.Listener
@@ -19,14 +20,17 @@ class Skya : JavaPlugin(), Listener
     lateinit var groupManager: GroupManager
     lateinit var inviteManager: InviteManager
     lateinit var campfireManager : CampfireManager
+    lateinit var islandManager: IslandManager
 
     override fun onEnable() {
         dbManager = DatabaseManager(dataFolder)
         groupManager = GroupManager(dbManager)
         inviteManager = InviteManager(this, dbManager, groupManager)
-        campfireManager = CampfireManager(dbManager)
+        campfireManager = CampfireManager(this, dbManager)
+        islandManager = IslandManager(dbManager, campfireManager)
 
         campfireManager.loadAllCampfires()
+        islandManager.loadAllIslands()
 
         GroupCommands.dbManager = dbManager
         GroupCommands.groupManager = groupManager
@@ -36,6 +40,7 @@ class Skya : JavaPlugin(), Listener
         GeneralCommands.groupManager = groupManager
         GeneralCommands.campfireManager = campfireManager
         GeneralCommands.dbManager = dbManager
+        GeneralCommands.islandManager = islandManager
 
         server.pluginManager.registerEvents(PlayerEvents(groupManager), this)
         server.pluginManager.registerEvents(CampfireListener(dbManager, campfireManager), this)
