@@ -17,6 +17,7 @@ repositories {
 }
 
 dependencies {
+    implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.xerial:sqlite-jdbc:3.50.3.0")
     paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")

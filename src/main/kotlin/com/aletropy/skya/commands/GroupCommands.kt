@@ -63,6 +63,33 @@ object GroupCommands
                     player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f)
                     0
                 }))
+        .then(Commands.literal("color")
+            .requires { it.sender is Player }
+            .then(Commands.argument("newColor", StringArgumentType.string())
+                .suggests { ctx, builder ->
+                    NamedTextColor.NAMES.keys().forEach {
+                        builder.suggest(it)
+                    }
+                    builder.buildFuture()
+                }
+                .executes { // group color newColor
+                    val newColorName = it.getArgument("newColor", String::class.java)
+                    val newColor = NamedTextColor.NAMES.value(newColorName) ?: NamedTextColor.WHITE
+                    val player = it.source.sender as Player
+                    val playerGroup = groupManager.getPlayerGroup(player) ?: return@executes 1
+
+                    groupManager.changeGroupColor(playerGroup.id, newColor)
+
+                    dbManager.getGroupCampfires(playerGroup.id).forEach { campfire ->
+                        campfireManager.updateCampfireDisplay(campfire.location, playerGroup.id)
+                    }
+
+                    player.sendMessage(Component.text("Your group has been colored to ")
+                        .color(NamedTextColor.AQUA)
+                        .append(Component.text(newColorName).color(newColor)))
+                    player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f)
+                    0
+                }))
         .then(Commands.literal("invite")
             .requires { it.sender is Player }
             .then(Commands.argument("target", ArgumentTypes.player()).executes { ctx ->

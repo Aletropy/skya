@@ -1,13 +1,14 @@
 package com.aletropy.skya.listeners
 
 import com.aletropy.skya.campfire.CampfireManager
+import com.aletropy.skya.campfire.SKY_CAMPFIRE_KEY
 import com.aletropy.skya.data.DatabaseManager
-import com.aletropy.skya.events.BoundedCampfireEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.Sound
+import org.bukkit.block.Campfire
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -51,6 +52,15 @@ class CampfireListener(private val dbManager : DatabaseManager, private val camp
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
         val clickedBlock = event.clickedBlock ?: return
         if (clickedBlock.type != Material.CAMPFIRE && clickedBlock.type != Material.SOUL_CAMPFIRE) return
+
+        if(clickedBlock.state is Campfire)
+        {
+            val state = clickedBlock.state as Campfire
+            val pdc = state.persistentDataContainer
+
+            if(!pdc.has(SKY_CAMPFIRE_KEY))
+                return
+        }
 
         val location = clickedBlock.location
         val boundCampfire = dbManager.getBoundCampfire(location)

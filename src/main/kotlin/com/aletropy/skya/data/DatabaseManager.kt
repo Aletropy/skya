@@ -1,6 +1,5 @@
 package com.aletropy.skya.data
 
-import com.aletropy.skya.events.BoundCampfireUpdateEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import java.io.File
@@ -45,6 +44,7 @@ class DatabaseManager(private val dataFolder : File)
             CREATE TABLE IF NOT EXISTS groups (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
+                color INTEGER NOT NULL,
                 skyEssence INTEGER NOT NULL DEFAULT 0,
                 islandLevel INTEGER NOT NULL DEFAULT 1
             );
@@ -88,10 +88,11 @@ class DatabaseManager(private val dataFolder : File)
         }
     }
 
-    fun createGroup(name: String): Int {
-        val sql = "INSERT INTO groups (name, skyEssence, islandLevel) VALUES (?, 0, 0)"
+    fun createGroup(name: String, color : Int): Int {
+        val sql = "INSERT INTO groups (name, color, skyEssence, islandLevel) VALUES (?, ?, 0, 0)"
         connection?.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)?.use { pstmt ->
             pstmt.setString(1, name)
+            pstmt.setInt(2, color)
             pstmt.executeUpdate()
             pstmt.generatedKeys?.use { keys ->
                 if (keys.next()) {
@@ -115,6 +116,19 @@ class DatabaseManager(private val dataFolder : File)
         return null
     }
 
+    fun getGroupByName(name: String): Group? {
+        val sql = "SELECT * FROM groups WHERE name = ?"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.setString(1, name)
+            pstmt.executeQuery()?.use { rs ->
+                if (rs.next()) {
+                    return rs.toGroup()
+                }
+            }
+        }
+        return null
+    }
+
     fun getAllGroups() : List<Group> {
         val sql = "SELECT * FROM groups"
         val list = mutableListOf<Group>()
@@ -128,12 +142,13 @@ class DatabaseManager(private val dataFolder : File)
     }
 
     fun updateGroup(group: Group) {
-        val sql = "UPDATE groups SET name = ?, skyEssence = ?, islandLevel = ? WHERE id = ?"
+        val sql = "UPDATE groups SET name = ?, color = ?, skyEssence = ?, islandLevel = ? WHERE id = ?"
         connection?.prepareStatement(sql)?.use { pstmt ->
             pstmt.setString(1, group.name)
-            pstmt.setInt(2, group.skyEssence)
-            pstmt.setInt(3, group.islandLevel)
-            pstmt.setInt(4, group.id)
+            pstmt.setInt(2, group.color)
+            pstmt.setInt(3, group.skyEssence)
+            pstmt.setInt(4, group.islandLevel)
+            pstmt.setInt(5, group.id)
             pstmt.executeUpdate()
         }
     }
@@ -268,7 +283,28 @@ class DatabaseManager(private val dataFolder : File)
             pstmt.setInt(4, island.location.blockZ)
             pstmt.setInt(5, island.groupId)
             pstmt.setInt(6, island.campfire?.id ?: -1)
-            pstmt.executeQuery()
+            pstmt.executeUpdate()
+        }
+    }
+
+    fun removeIsland(island : Island)
+    {
+        val sql = "DELETE FROM islands WHERE world = ? AND x = ? AND y = ? AND z = ?"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.setString(1, island.location.world.name)
+            pstmt.setInt(2, island.location.blockX)
+            pstmt.setInt(3, island.location.blockY)
+            pstmt.setInt(4, island.location.blockZ)
+            pstmt.execute()
+        }
+    }
+
+    fun removeGroupIslands(groupId : Int)
+    {
+        val sql = "DELETE FROM islands WHERE groupId = ?"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.setInt(1, groupId)
+            pstmt.execute()
         }
     }
 
@@ -303,7 +339,8 @@ class DatabaseManager(private val dataFolder : File)
         id = getInt("id"),
         name = getString("name"),
         skyEssence = getInt("skyEssence"),
-        islandLevel = getInt("islandLevel")
+        islandLevel = getInt("islandLevel"),
+        color = getInt("color")
     )
 
     private fun ResultSet.toBoundCampfire(): BoundCampfire {

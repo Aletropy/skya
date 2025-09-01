@@ -14,11 +14,12 @@ import org.bukkit.util.Vector
 
 object UtilitiesCommands
 {
-    private val gotoLocations = mapOf<String, Vector>(
+    private val gotoLocations = mapOf(
         Pair("Lobby", Vector(10000.0, 100.0, 10000.0)),
     )
 
     val GOTO: LiteralCommandNode<CommandSourceStack> = Commands.literal("goto")
+        .requires { it.sender is Player && (it.sender as Player).isOp }
         .then(Commands.argument("name", StringArgumentType.string())
             .suggests { ctx, builder ->
                 gotoLocations.forEach {

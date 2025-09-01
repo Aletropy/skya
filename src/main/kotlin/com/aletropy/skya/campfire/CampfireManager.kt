@@ -10,9 +10,12 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Display
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.TextDisplay
+
+val SKY_CAMPFIRE_KEY = NamespacedKey(Skya.PLUGIN_ID, "sky_campfire")
 
 class CampfireManager(private val plugin : Skya, private val dbManager : DatabaseManager)
 {
@@ -62,7 +65,7 @@ class CampfireManager(private val plugin : Skya, private val dbManager : Databas
             essenceDisplay.text(Component.text(" - Sky Essence: ", NamedTextColor.AQUA)
                 .append(Component.text("${group.skyEssence} SE", NamedTextColor.GREEN)))
             val nameDisplay = displays[2]
-            nameDisplay.text(Component.text("- ${group.name}'s Campfire -", NamedTextColor.GOLD))
+            nameDisplay.text(Component.text("- ${group.name}'s Campfire -", NamedTextColor.namedColor(group.color)))
         }
 
         activeDisplays.remove(location)?.forEach { it.remove() }
@@ -85,7 +88,7 @@ class CampfireManager(private val plugin : Skya, private val dbManager : Databas
 
         displayLocation.add(0.0, 0.3, 0.0)
         val nameDisplay = location.world.spawnEntity(displayLocation, EntityType.TEXT_DISPLAY) as TextDisplay
-        nameDisplay.text(Component.text("- ${group.name}'s Campfire -", NamedTextColor.GOLD))
+        nameDisplay.text(Component.text("- ${group.name}'s Campfire -", NamedTextColor.namedColor(group.color)))
         nameDisplay.billboard = Display.Billboard.CENTER
 
         activeDisplays[location] = listOf(levelDisplay, essenceDisplay, nameDisplay)

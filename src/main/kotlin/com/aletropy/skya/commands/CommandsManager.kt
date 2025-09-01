@@ -12,8 +12,10 @@ object CommandsManager
         val reg = commands.registrar()
 
         reg.register(GeneralCommands.REGEN)
-        reg.register(GeneralCommands.CREATE_ISLAND)
+        reg.register(GeneralCommands.SANDBOX)
+        reg.register(GeneralCommands.GIVE)
         reg.register(UtilitiesCommands.GOTO)
+        reg.register(IslandCommands.ISLAND)
         reg.register(GroupCommands.GROUP)
     }
 }
