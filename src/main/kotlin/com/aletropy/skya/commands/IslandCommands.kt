@@ -62,7 +62,7 @@ object IslandCommands
                     val islandType = ctx.getArgument("type", NamespacedKey::class.java)
                     val groupId = dbManager.getPlayerGroupId(player.uniqueId.toString())!!
 
-                    if(dbManager.getGroupIslands(groupId).size > 1)
+                    if(dbManager.getGroupIslands(groupId).isNotEmpty())
                     {
                         player.sendMessage(
                             Component.text("Your group already has a main island. Use '/island goto' to teleport to your group's island",

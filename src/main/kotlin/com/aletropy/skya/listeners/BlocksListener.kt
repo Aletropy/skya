@@ -1,6 +1,6 @@
 package com.aletropy.skya.listeners
 
-import com.aletropy.skya.blocks.BlockManager
+import com.aletropy.skya.Skya
 import com.aletropy.skya.blocks.CUSTOM_BLOCK_KEY
 import com.aletropy.skya.blocks.CUSTOM_BLOCK_TYPE_KEY
 import com.aletropy.skya.blocks.CustomBlocks
@@ -12,8 +12,11 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.persistence.PersistentDataType
 
-class BlocksListener(private val blockManager: BlockManager) : Listener
+@RegisterListener
+class BlocksListener : Listener
 {
+    private val blockManager = Skya.INSTANCE.blockManager
+
     @EventHandler
     fun onChunkLoaded(event : ChunkLoadEvent)
     {
@@ -62,10 +65,20 @@ class BlocksListener(private val blockManager: BlockManager) : Listener
 
         if(!entity.persistentDataContainer.has(CUSTOM_BLOCK_KEY)) return
 
+        val customBlockType = entity.persistentDataContainer.get(
+            CUSTOM_BLOCK_TYPE_KEY, PersistentDataType.STRING
+        )
+
+        val cbClass = CustomBlocks.BLOCKS[customBlockType] ?: return
+        val stack = cbClass.constructors.first().call().stack
+
         blockManager.blocks[location.toBlockLocation()]?.onBreak(
             block, entity, event.player
         )
 
+        event.player.give(stack)
+
+        event.isCancelled = true
         blockManager.removeBlock(location)
     }
 }

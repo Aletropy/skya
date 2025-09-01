@@ -18,4 +18,8 @@ object CustomBlocks
         }
         map.toMap()
     }
+
+    fun registerAllBlocks()
+    {
+    }
 }

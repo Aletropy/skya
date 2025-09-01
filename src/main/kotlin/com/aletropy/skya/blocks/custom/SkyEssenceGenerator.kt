@@ -7,13 +7,11 @@ import com.aletropy.skya.blocks.CustomBlock
 import com.aletropy.skya.blocks.CustomBlocks
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.Particle
 import org.bukkit.block.Block
-import org.bukkit.entity.Marker
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
@@ -52,14 +50,7 @@ class SkyEssenceGenerator : CustomBlock
         Skya.INSTANCE.dbManager.addSkyEssenceToGroup(groupId, 1)
 
         world.spawnParticle(
-            Particle.END_ROD, location.clone().add(0.5, 1.5, 0.5), 10
+            Particle.END_ROD, location.clone().add(0.5, 1.5, 0.5), 10, .1, .1, .1, 0.1
         )
-    }
-
-    override fun onBreak(block: Block, entity: Marker, destroyer: Player?)
-    {
-        if(destroyer == null) return
-
-        destroyer.sendMessage("You destroyed me :(")
     }
 }

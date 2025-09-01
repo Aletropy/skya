@@ -1,12 +1,15 @@
 package com.aletropy.skya.listeners
 
-import com.aletropy.skya.group.GroupManager
+import com.aletropy.skya.Skya
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
-class GroupListener(private val groupManager: GroupManager) : Listener
+@RegisterListener
+class GroupListener : Listener
 {
+    private val groupManager = Skya.INSTANCE.groupManager
+
     @EventHandler
     fun onPlayerJoin(event : PlayerJoinEvent)
     {

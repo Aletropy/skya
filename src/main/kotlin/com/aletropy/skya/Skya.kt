@@ -2,18 +2,15 @@ package com.aletropy.skya
 
 import com.aletropy.skya.blocks.BlockManager
 import com.aletropy.skya.campfire.CampfireManager
+import com.aletropy.skya.commands.CommandsRegistry
 import com.aletropy.skya.commands.GeneralCommands
 import com.aletropy.skya.commands.GroupCommands
 import com.aletropy.skya.commands.IslandCommands
 import com.aletropy.skya.data.DatabaseManager
-import com.aletropy.skya.listeners.CampfireListener
-import com.aletropy.skya.listeners.PlayerListener
 import com.aletropy.skya.group.GroupManager
 import com.aletropy.skya.group.InviteManager
 import com.aletropy.skya.island.IslandManager
-import com.aletropy.skya.listeners.BlocksListener
-import com.aletropy.skya.listeners.DataListener
-import com.aletropy.skya.listeners.GroupListener
+import com.aletropy.skya.listeners.ListenersRegistry
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -61,11 +58,8 @@ class Skya : JavaPlugin(), Listener
         IslandCommands.dbManager = dbManager
         IslandCommands.islandManager = islandManager
 
-        server.pluginManager.registerEvents(PlayerListener(groupManager), this)
-        server.pluginManager.registerEvents(CampfireListener(dbManager, campfireManager), this)
-        server.pluginManager.registerEvents(GroupListener(groupManager), this)
-        server.pluginManager.registerEvents(DataListener(dbManager), this)
-        server.pluginManager.registerEvents(BlocksListener(blockManager), this)
+        ListenersRegistry(this)
+        CommandsRegistry(this)
     }
 
     override fun onDisable() {

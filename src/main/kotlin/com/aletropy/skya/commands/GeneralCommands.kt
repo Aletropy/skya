@@ -22,6 +22,7 @@ import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import java.util.*
 
+@RegisterCommands
 object GeneralCommands
 {
     lateinit var dbManager : DatabaseManager

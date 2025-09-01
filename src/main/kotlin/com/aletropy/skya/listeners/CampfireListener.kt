@@ -1,8 +1,7 @@
 package com.aletropy.skya.listeners
 
-import com.aletropy.skya.campfire.CampfireManager
+import com.aletropy.skya.Skya
 import com.aletropy.skya.campfire.SKY_CAMPFIRE_KEY
-import com.aletropy.skya.data.DatabaseManager
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.GameMode
@@ -17,8 +16,12 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockExplodeEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
-class CampfireListener(private val dbManager : DatabaseManager, private val campfireManager: CampfireManager) : Listener
+@RegisterListener
+class CampfireListener : Listener
 {
+    private val dbManager = Skya.INSTANCE.dbManager
+    private val campfireManager = Skya.INSTANCE.campfireManager
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onCampfireBroken(event : BlockBreakEvent)
     {
