@@ -9,6 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/skya-api" />
+            <option value="$PROJECT_DIR$/skya-plugin" />
+            <option value="$PROJECT_DIR$/skya-processor" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="true" />
