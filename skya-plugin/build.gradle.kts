@@ -33,7 +33,7 @@ tasks {
             "-avz",
             "-e",
             "ssh",
-            "/home/aletropy/Projects/Skya/build/libs/Skya-0.1.1-all.jar",
+            "/home/aletropy/Projects/Skya/skya-plugin/build/libs/skya-plugin-0.1.1-all.jar",
             "sandbox-server:~/Server/plugins/Skya-0.1.1.jar"
         )
     }

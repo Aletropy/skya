@@ -2,6 +2,7 @@ package com.aletropy.skya.blocks
 
 import com.aletropy.skya.Skya
 import com.aletropy.skya.api.CustomBlock
+import com.aletropy.skya.api.ITickable
 import com.aletropy.skya.blocks.custom.CustomBlocks
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -39,9 +40,10 @@ class BlockManager(plugin : Skya)
     init {
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, Runnable {
             blocks.toMap().forEach { (location, customBlock) ->
-                customBlock.update(location)
+                if(customBlock is ITickable)
+                    customBlock.update(location)
             }
-        }, 0L, 20L)
+        }, 20L, 20L)
     }
 
     fun loadBlocksForChunk(chunk : Chunk)
@@ -60,6 +62,7 @@ class BlockManager(plugin : Skya)
                 }
             }
 
+            cbInstance.onLoad(location.toBlockLocation().block)
             blocks[location.toBlockLocation()] = cbInstance
         }
     }
@@ -79,7 +82,8 @@ class BlockManager(plugin : Skya)
         val blockType = CustomBlocks.NAMES[cb::class] ?: return
 
         location.block.type = cb.type
-        cb.onPlace(player, location.block)
+        cb.onPlace(player, location.block, player.inventory.itemInMainHand)
+        cb.onLoad(location.block)
         blocks[location] = cb
 
         val dataObject = cb.getDataObject()
@@ -87,6 +91,20 @@ class BlockManager(plugin : Skya)
             CustomBlocks.SERIALIZERS[blockType]?.let {
                 @Suppress("UNCHECKED_CAST")
                 json.encodeToString(it as KSerializer<Any>, dataObject)
+            } ?: "{}"
+        } else "{}"
+
+        dbManager.storeCustomBlock(location, blockType, dataString)
+    }
+
+    fun saveBlockState(location: Location, customBlock: CustomBlock) {
+        val blockType = CustomBlocks.NAMES[customBlock::class] ?: return
+        val dataObject = customBlock.getDataObject()
+
+        val dataString = if (dataObject != null) {
+            CustomBlocks.SERIALIZERS[blockType]?.let { serializer ->
+                @Suppress("UNCHECKED_CAST")
+                json.encodeToString(serializer as KSerializer<Any>, dataObject)
             } ?: "{}"
         } else "{}"
 

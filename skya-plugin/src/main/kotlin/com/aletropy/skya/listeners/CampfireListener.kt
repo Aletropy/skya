@@ -1,7 +1,7 @@
 package com.aletropy.skya.listeners
 
 import com.aletropy.skya.Skya
-import com.aletropy.skya.campfire.SKY_CAMPFIRE_KEY
+import com.aletropy.skya.island.SKY_CAMPFIRE_KEY
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.GameMode

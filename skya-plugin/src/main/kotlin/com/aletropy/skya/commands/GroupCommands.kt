@@ -17,7 +17,6 @@ import org.bukkit.entity.Player
 object GroupCommands
 {
     var dbManager = Skya.INSTANCE.dbManager
-    var campfireManager = Skya.INSTANCE.campfireManager
     var groupManager = Skya.INSTANCE.groupManager
     var inviteManager = Skya.INSTANCE.inviteManager
 
@@ -51,10 +50,6 @@ object GroupCommands
                     val playerGroup = groupManager.getPlayerGroup(player) ?: return@executes 1
                     groupManager.renameGroup(playerGroup.id, newName)
 
-                    dbManager.getGroupCampfires(playerGroup.id).forEach { campfire ->
-                        campfireManager.updateCampfireDisplay(campfire.location, playerGroup.id)
-                    }
-
                     player.sendMessage(Component.text("Your group has been renamed to ")
                         .color(NamedTextColor.GREEN)
                         .append(Component.text(newName).color(NamedTextColor.LIGHT_PURPLE)))
@@ -77,10 +72,6 @@ object GroupCommands
                     val playerGroup = groupManager.getPlayerGroup(player) ?: return@executes 1
 
                     groupManager.changeGroupColor(playerGroup.id, newColor)
-
-                    dbManager.getGroupCampfires(playerGroup.id).forEach { campfire ->
-                        campfireManager.updateCampfireDisplay(campfire.location, playerGroup.id)
-                    }
 
                     player.sendMessage(Component.text("Your group has been colored to ")
                         .color(NamedTextColor.AQUA)

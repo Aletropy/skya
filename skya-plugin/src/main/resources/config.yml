@@ -1,0 +1,9 @@
+# Skya Plugin Configuration
+
+balance:
+  generator:
+    upgrade-cost-base: 100.0
+    upgrade-cost-growth-factor: 1.15
+    production-base: 1
+    item-cost-base: 500.0
+    item-cost-growth-factor: 1.5

@@ -15,10 +15,18 @@ interface CustomBlock
     fun getDataObject() : Any?
     fun setDataObject(data : Any)
 
-    fun update(location : Location) { }
-
-    fun onPlace(player : Player, block : Block) { }
+    fun onLoad(block : Block) { }
+    fun onPlace(player : Player, block : Block, blockStack : ItemStack) { }
     fun onBreak(block : Block, breaker : Player?) { }
+}
+
+interface ITickable
+{
+    fun update(location : Location)
+}
+
+interface IInteractable {
+    fun onInteract(player : Player, block: Block)
 }
 
 @Target(AnnotationTarget.CLASS)

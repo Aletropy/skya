@@ -202,6 +202,19 @@ class DatabaseManager(private val dataFolder : File)
         return null
     }
 
+    fun getGroupSkyEssence(groupId : Int) : Int
+    {
+        val sql = "SELECT skyEssence FROM groups WHERE id = ?"
+        connection?.prepareStatement(sql)?.use { pstmt ->
+            pstmt.setInt(1, groupId)
+            pstmt.executeQuery()?.use { rs ->
+                if(rs.next())
+                    return rs.getInt("skyEssence")
+            }
+        }
+        return 0
+    }
+
     fun getAllGroups() : List<Group> {
         val sql = "SELECT * FROM groups"
         val list = mutableListOf<Group>()

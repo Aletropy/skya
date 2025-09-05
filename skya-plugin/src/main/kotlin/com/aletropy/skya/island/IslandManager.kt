@@ -1,7 +1,7 @@
 package com.aletropy.skya.island
 
+import com.aletropy.skya.Skya
 import com.aletropy.skya.campfire.CampfireManager
-import com.aletropy.skya.campfire.SKY_CAMPFIRE_KEY
 import com.aletropy.skya.data.DatabaseManager
 import com.aletropy.skya.data.Island
 import com.aletropy.skya.events.IslandCreatedEvent
@@ -21,6 +21,7 @@ import kotlin.math.sin
 
 val CAMPFIRE_RELATIVE_LOCATION = Vector(2.0, 0.0, 1.0)
 val ISLAND_RELATIVE_LOCATION = Vector(-7.0, -11.0, -7.0)
+val SKY_CAMPFIRE_KEY = NamespacedKey(Skya.PLUGIN_ID, "sky_campfire")
 
 class IslandManager(private val dbManager : DatabaseManager, val campfireManager: CampfireManager)
 {

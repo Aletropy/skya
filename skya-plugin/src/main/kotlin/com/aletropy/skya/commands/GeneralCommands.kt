@@ -105,4 +105,16 @@ object GeneralCommands
                 }
             )
         ).build()
+
+    val BOX : LiteralCommandNode<CommandSourceStack> = Commands.literal("box")
+        .executes {
+            val player = it.source.sender as Player
+            val border = Bukkit.createWorldBorder()
+
+            border.setCenter(0.0, 0.0)
+            border.size = 16.0
+
+            player.worldBorder = border
+            0
+        }.build()
 }
