@@ -3,7 +3,7 @@ package com.aletropy.skya
 import BalanceConfig
 import com.aletropy.skya.blocks.BlockManager
 import com.aletropy.skya.campfire.CampfireManager
-import com.aletropy.skya.commands.*
+import com.aletropy.skya.commands.generated.CommandsRegistry
 import com.aletropy.skya.data.DatabaseManager
 import com.aletropy.skya.economy.SkyEssenceManager
 import com.aletropy.skya.group.GroupManager
@@ -49,21 +49,9 @@ class Skya : JavaPlugin(), Listener
         islandManager.loadAllIslands()
 
         ListenersRegistry(this)
-        registerCommands()
-    }
 
-    fun registerCommands()
-    {
-        lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { commands ->
-            val reg = commands.registrar()
-            reg.register(GeneralCommands.GIVE)
-            reg.register(GeneralCommands.BOX)
-            reg.register(GeneralCommands.REGEN)
-            reg.register(GroupCommands.GROUP)
-            reg.register(GroupCommands.SE)
-            reg.register(GeneratorCommands.GEN_COMMAND)
-            reg.register(IslandCommands.ISLAND)
-            reg.register(UtilitiesCommands.GOTO)
+        lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {
+            CommandsRegistry.registerAll(it.registrar())
         }
     }
 

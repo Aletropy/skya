@@ -1,5 +1,6 @@
 package com.aletropy.skya.commands
 
+import com.aletropy.skya.api.CommandsProvider
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack
@@ -12,6 +13,7 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 
+@CommandsProvider
 object UtilitiesCommands
 {
     private val gotoLocations = mapOf(

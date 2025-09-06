@@ -1,6 +1,7 @@
 package com.aletropy.skya.commands
 
 import com.aletropy.skya.Skya
+import com.aletropy.skya.api.CommandsProvider
 import com.aletropy.skya.data.Messages
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.tree.LiteralCommandNode
@@ -14,6 +15,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 
+@CommandsProvider
 object GroupCommands
 {
     var dbManager = Skya.INSTANCE.dbManager

@@ -1,6 +1,7 @@
 package com.aletropy.skya.commands
 
 import com.aletropy.skya.Skya
+import com.aletropy.skya.api.CommandsProvider
 import com.aletropy.skya.island.Islands
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.tree.LiteralCommandNode
@@ -15,6 +16,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 
+@CommandsProvider
 object IslandCommands
 {
     var dbManager = Skya.INSTANCE.dbManager

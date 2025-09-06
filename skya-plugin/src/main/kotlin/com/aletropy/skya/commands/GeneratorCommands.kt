@@ -2,6 +2,7 @@ package com.aletropy.skya.commands
 
 import BalanceConfig
 import com.aletropy.skya.Skya
+import com.aletropy.skya.api.CommandsProvider
 import com.aletropy.skya.blocks.custom.SkyEssenceGenerator
 import com.aletropy.skya.data.TransactionReason
 import com.aletropy.skya.economy.PassiveIncomeSource
@@ -19,6 +20,7 @@ import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 
+@CommandsProvider
 object GeneratorCommands
 {
 	private val blockManager = Skya.INSTANCE.blockManager

@@ -69,11 +69,11 @@ class GroupManager(private val dbManager : DatabaseManager)
         }
 
         team.setOption(
-            Team.Option.COLLISION_RULE, Team.OptionStatus.FOR_OTHER_TEAMS
+            Team.Option.COLLISION_RULE, Team.OptionStatus.FOR_OWN_TEAM
         )
 
         team.setOption(
-            Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OWN_TEAM
+            Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OTHER_TEAMS
         )
 
         team.setAllowFriendlyFire(false)

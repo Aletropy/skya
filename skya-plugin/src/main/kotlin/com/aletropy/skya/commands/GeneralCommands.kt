@@ -1,6 +1,7 @@
 package com.aletropy.skya.commands
 
 import com.aletropy.skya.Skya
+import com.aletropy.skya.api.CommandsProvider
 import com.aletropy.skya.blocks.custom.CustomBlocks
 import com.aletropy.skya.island.Islands
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -21,6 +22,7 @@ import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import java.util.*
 
+@CommandsProvider
 object GeneralCommands
 {
     var dbManager = Skya.INSTANCE.dbManager

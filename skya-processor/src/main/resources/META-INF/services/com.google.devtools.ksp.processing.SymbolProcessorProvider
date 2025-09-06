@@ -1,1 +1,2 @@
 com.aletropy.skya.processor.CustomBlockProcessorProvider
+com.aletropy.skya.processor.CommandProcessorProvider

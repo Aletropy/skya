@@ -40,12 +40,12 @@ class PlayerListener() : Listener
     {
         val group = groupManager.getPlayerGroup(event.player) ?: return
 
-        val prefix = Component.text("[${group.name}] ", NamedTextColor.namedColor(group.color))
+        val prefix = Component.text(" [${group.name}] ", NamedTextColor.namedColor(group.color))
 
         event.signedMessage()
 
         event.renderer { _, _, _, _ ->
-            Component.text("<")
+            Component.text("< ")
                 .append(prefix)
                 .appendSpace()
                 .append(Component.text(event.player.name))
