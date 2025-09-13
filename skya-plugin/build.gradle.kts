@@ -15,6 +15,7 @@ dependencies {
 
     ksp(project(":skya-processor"))
     implementation(project(":skya-api"))
+	implementation(project(":skya-menus"))
 
     paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
 }
@@ -29,11 +30,12 @@ tasks {
         group = "deployment"
         description = "Deploys the plugin to the sandbox server."
         commandLine(
+            "wsl",
             "rsync",
             "-avz",
             "-e",
             "ssh",
-            "/home/aletropy/Projects/Skya/skya-plugin/build/libs/skya-plugin-0.1.1-all.jar",
+            "/mnt/n/Projects/skya/skya-plugin/build/libs/skya-plugin-0.1.1-all.jar",
             "sandbox-server:~/Server/plugins/Skya-0.1.1.jar"
         )
     }

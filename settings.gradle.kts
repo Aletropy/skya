@@ -3,4 +3,4 @@ plugins {
 }
 rootProject.name = "Skya"
 
-include("skya-api", "skya-processor", "skya-plugin")
+include("skya-api", "skya-processor", "skya-menus", "skya-plugin")

@@ -26,11 +26,7 @@ import java.util.*
 object GeneralCommands
 {
     var dbManager = Skya.INSTANCE.dbManager
-    var campfireManager = Skya.INSTANCE.campfireManager
-    var groupManager = Skya.INSTANCE.groupManager
-
     var islandManager = Skya.INSTANCE.islandManager
-    var blockManager = Skya.INSTANCE.blockManager
 
     val REGEN: LiteralCommandNode<CommandSourceStack> = Commands.literal("regen")
         .requires { it.sender.isOp }
@@ -107,16 +103,4 @@ object GeneralCommands
                 }
             )
         ).build()
-
-    val BOX : LiteralCommandNode<CommandSourceStack> = Commands.literal("box")
-        .executes {
-            val player = it.source.sender as Player
-            val border = Bukkit.createWorldBorder()
-
-            border.setCenter(0.0, 0.0)
-            border.size = 16.0
-
-            player.worldBorder = border
-            0
-        }.build()
 }

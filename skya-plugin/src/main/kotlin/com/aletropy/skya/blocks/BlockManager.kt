@@ -11,6 +11,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
+import kotlin.reflect.KClass
 
 val CUSTOM_BLOCK_KEY = NamespacedKey(Skya.PLUGIN_ID, "custom_block")
 val CUSTOM_BLOCK_TYPE_KEY = NamespacedKey(Skya.PLUGIN_ID, "custom_block_type")
@@ -25,6 +26,18 @@ fun createCustomBlockStack(customBlock : CustomBlock, stack : ItemStack) : ItemS
         }
         itemStack
     }
+}
+
+fun <T : CustomBlock> createCustomBlockStack(customBlockClass : KClass<T>, stack : ItemStack) : ItemStack
+{
+	return stack.let { itemStack ->
+		itemStack.editMeta {
+			it.persistentDataContainer.set(CUSTOM_BLOCK_KEY, PersistentDataType.BOOLEAN, true)
+			it.persistentDataContainer.set(CUSTOM_BLOCK_TYPE_KEY, PersistentDataType.STRING,
+				CustomBlocks.NAMES[customBlockClass]!!)
+		}
+		itemStack
+	}
 }
 
 class BlockManager(plugin : Skya)

@@ -1,9 +1,14 @@
 # Skya Plugin Configuration
 
 balance:
+  campfire:
+    production-base: 1
   generator:
     upgrade-cost-base: 100.0
     upgrade-cost-growth-factor: 1.15
     production-base: 1
-    item-cost-base: 500.0
-    item-cost-growth-factor: 1.5
+  shop:
+    items:
+      generator:
+        cost-base: 500
+        cost-growth-factor: 1.05

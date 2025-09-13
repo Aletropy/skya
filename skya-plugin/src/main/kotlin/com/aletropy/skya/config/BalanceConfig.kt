@@ -8,7 +8,8 @@ object BalanceConfig
 
 	private var genUpgradeCostBase : Double = 100.0
 	private var genUpgradeCostGrowth : Double = 1.15
-	private var genProductionBase : Int = 1
+    private var genProductionBase : Int = 1
+    private var campfireProductionBase : Int = 1
 
 	fun load(plugin : Skya) {
 		plugin.saveDefaultConfig()
@@ -16,7 +17,20 @@ object BalanceConfig
 
 		genUpgradeCostBase = config.getDouble("balance.generator.upgrade-cost-base", 100.0)
 		genUpgradeCostGrowth = config.getDouble("balance.generator.upgrade-cost-growth-factor", 1.15)
-		genProductionBase = config.getInt("balance.generator.production-base")
+        genProductionBase = config.getInt("balance.generator.production-base")
+        campfireProductionBase = config.getInt("balance.campfire.production-base")
+	}
+
+    fun getCampfireGen() : Int
+    {
+        return campfireProductionBase
+    }
+
+	fun getItemCost(itemName : String, purchasedAmount : Int) : Int
+	{
+		val itemCostBase = config.getInt("balance.shop.items.${itemName}.cost-base")
+		val itemCostGrowth = config.getDouble("balance.shop.items.${itemName}.cost-growth-factor")
+		return (itemCostBase * itemCostGrowth.pow(purchasedAmount)).toInt()
 	}
 
 	fun getGeneratorUpgradeCost(currentLevel : Int) : Long {

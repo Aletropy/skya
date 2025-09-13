@@ -1,6 +1,8 @@
 package com.aletropy.skya.data
 
+import kotlinx.serialization.json.Json
 import org.bukkit.Bukkit
+import org.bukkit.Chunk
 import org.bukkit.Location
 import java.io.File
 import java.sql.Connection
@@ -51,6 +53,13 @@ class DatabaseManager(private val dataFolder : File)
             );
         """
 
+		val createShopTable = """
+			CREATE TABLE IF NOT EXISTS shop (
+				groupId INTEGER PRIMARY KEY
+				purchases TEXT
+				FOREIGN KEY(groupId) REFERENCES groups(id) ON DELETE CASCADE
+		""".trimIndent()
+
         val createIndex = """
             CREATE INDEX IF NOT EXISTS idx_custom_blocks_position ON custom_blocks (world, x, z);
         """
@@ -100,7 +109,8 @@ class DatabaseManager(private val dataFolder : File)
             stmt.execute(createMembersTable)
             stmt.execute(createCampfiresTable)
             stmt.execute(createIslandsTable)
-            stmt.execute(createCustomBlocksTable)
+			stmt.execute(createCustomBlocksTable)
+			stmt.execute(createShopTable)
             stmt.execute(createIndex)
         }
     }
@@ -335,6 +345,30 @@ class DatabaseManager(private val dataFolder : File)
         return list
     }
 
+	fun getCampfiresInChunk(chunk : Chunk) : List<BoundCampfire>
+	{
+		val campfires = mutableListOf<BoundCampfire>()
+		val sql = "SELECT * FROM bound_campfires WHERE world = ? AND x BETWEEN ? AND ? AND z BETWEEN ? AND ?"
+
+		val minX = chunk.x * 16
+		val maxX = minX + 15
+		val minZ = chunk.z * 16
+		val maxZ = minZ + 15
+
+		connection?.prepareStatement(sql)?.use { pstmt ->
+			pstmt.setString(1, chunk.world.name)
+			pstmt.setInt(2, minX)
+			pstmt.setInt(3, maxX)
+			pstmt.setInt(4, minZ)
+			pstmt.setInt(5, maxZ)
+			pstmt.executeQuery()?.use { rs ->
+				while(rs.next())
+					campfires.add(rs.toBoundCampfire())
+			}
+		}
+		return campfires
+	}
+
     fun removeBindedCampfire(location: Location) {
         val sql = "DELETE FROM bound_campfires WHERE world = ? AND x = ? AND y = ? AND z = ?"
         connection?.prepareStatement(sql)?.use { pstmt ->
@@ -420,6 +454,7 @@ class DatabaseManager(private val dataFolder : File)
         }
         return list
     }
+	}
 
     private fun ResultSet.toGroup(): Group = Group(
         id = getInt("id"),

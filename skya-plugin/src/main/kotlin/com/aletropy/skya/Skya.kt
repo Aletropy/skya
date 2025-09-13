@@ -10,6 +10,7 @@ import com.aletropy.skya.group.GroupManager
 import com.aletropy.skya.group.InviteManager
 import com.aletropy.skya.island.IslandManager
 import com.aletropy.skya.listeners.ListenersRegistry
+import com.aletropy.skya.menus.MenuManager
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
@@ -36,6 +37,7 @@ class Skya : JavaPlugin(), Listener
     override fun onEnable() {
 
         BalanceConfig.load(this)
+		MenuManager.initialize(this)
 
         dbManager = DatabaseManager(dataFolder)
         groupManager = GroupManager(dbManager)

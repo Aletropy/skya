@@ -3,6 +3,8 @@ package com.aletropy.skya.commands
 import com.aletropy.skya.Skya
 import com.aletropy.skya.api.CommandsProvider
 import com.aletropy.skya.data.Messages
+import com.aletropy.skya.data.TransactionReason
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack
@@ -104,8 +106,87 @@ object GroupCommands
             })
         .build()
 
-    val SE : LiteralCommandNode<CommandSourceStack> = Commands.literal("se")
+    val SE_COMMAND : LiteralCommandNode<CommandSourceStack> = Commands.literal("se")
         .requires { it.sender is Player }
+		.then(Commands.literal("op")
+			.requires { it.sender.isOp }
+			.then(Commands.literal("give")
+				.then(Commands.argument("group", StringArgumentType.string())
+					.suggests { ctx, builder ->
+						dbManager.getAllGroups().forEach {
+							builder.suggest(it.name)
+						}
+						builder.buildFuture()
+					}
+					.then(Commands.argument("amount", IntegerArgumentType.integer())
+						.executes { ctx ->
+							val player = ctx.source.sender as Player
+							val group = dbManager.getGroupByName(ctx.getArgument("group", String::class.java)) ?: return@executes 1
+							val amount = ctx.getArgument("amount", Int::class.java)
+
+							Skya.INSTANCE.skyEssenceManager.addEssence(
+								group.id, amount, TransactionReason.ADMIN_GIVE
+							)
+
+							groupManager.broadcastMessage(group.id,
+								Component.text("${player.name} has admin gave you $amount/SE"
+								, NamedTextColor.GOLD)
+							)
+							0
+						}
+					)
+				)
+			)
+			.then(Commands.literal("remove")
+				.then(Commands.argument("group", StringArgumentType.string())
+					.suggests { ctx, builder ->
+						dbManager.getAllGroups().forEach {
+							builder.suggest(it.name)
+						}
+						builder.buildFuture()
+					}
+					.then(Commands.argument("amount", IntegerArgumentType.integer())
+						.executes { ctx ->
+							val player = ctx.source.sender as Player
+							val group = dbManager.getGroupByName(ctx.getArgument("group", String::class.java)) ?: return@executes 1
+							val amount = ctx.getArgument("amount", Int::class.java)
+
+							Skya.INSTANCE.skyEssenceManager.removeEssence(
+								group.id, amount, TransactionReason.ADMIN_GIVE
+							)
+
+							groupManager.broadcastMessage(group.id,
+								Component.text("${player.name} has admin toke from you $amount/SE"
+									, NamedTextColor.BLUE)
+							)
+							0
+						}
+					)
+				)
+			)
+			.then(Commands.literal("get")
+				.then(Commands.argument("group", StringArgumentType.string())
+					.suggests { ctx, builder ->
+						dbManager.getAllGroups().forEach {
+							builder.suggest(it.name)
+						}
+						builder.buildFuture()
+					}
+					.executes { ctx ->
+						val player = ctx.source.sender as Player
+						val group = dbManager.getGroupByName(ctx.getArgument("group", String::class.java)) ?: return@executes 1
+
+						val essence = Skya.INSTANCE.skyEssenceManager.getEssence(group.id)
+
+						player.sendMessage(
+							Component.text("${group.name} has $essence/SE"
+								, NamedTextColor.GREEN)
+						)
+						0
+					}
+				)
+			)
+		)
         .executes { ctx ->
             val player = ctx.source.sender as Player
             val groupId = dbManager.getPlayerGroupId(player.uniqueId.toString())!!

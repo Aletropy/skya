@@ -33,25 +33,30 @@ class SkyEssenceGenerator : CustomBlock, ITickable, IInteractable
     data class Data(val groupId : Int, var level : Int)
     private var data : Data? = null
 
+	companion object {
+		val STACK = createCustomBlockStack(SkyEssenceGenerator::class, ItemStack(Material.BUDDING_AMETHYST)).let { stack ->
+			stack.editMeta {
+				it.setEnchantmentGlintOverride(true)
+				it.displayName(
+					Component.text("Sky Essence Generator", NamedTextColor.LIGHT_PURPLE)
+				)
+				it.lore(listOf(
+					Component.text("Level: 1", NamedTextColor.GRAY)
+				))
+			}
+			stack
+		}
+	}
+
     override val type = Material.BUDDING_AMETHYST
-    override val stack = createCustomBlockStack(this, ItemStack(type)).let { stack ->
-        stack.editMeta {
-            it.setEnchantmentGlintOverride(true)
-            it.displayName(
-                Component.text("Sky Essence Generator", NamedTextColor.LIGHT_PURPLE)
-            )
-            it.lore(listOf(
-                Component.text("Level: 1", NamedTextColor.GRAY)
-            ))
-        }
-        stack
-    }
+    override val stack = STACK
 
     override fun onLoad(block: Block)
     {
         if(data == null) return
         Skya.INSTANCE.skyEssenceManager.registerPassiveSource(data!!.groupId,
-            PassiveIncomeSource(block.location.toBlockLocation(), 1))
+            PassiveIncomeSource(block.location.toBlockLocation(),
+				BalanceConfig.getGeneratorProduction(data!!.level)))
     }
 
     override fun onPlace(player: Player, block: Block, blockStack: ItemStack)

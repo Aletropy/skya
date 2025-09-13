@@ -46,6 +46,8 @@ class SkyEssenceManager(private val plugin: Skya)
 		val currentEssence = getEssence(groupId)
 		if (currentEssence < amount)
 		{
+			if(reason == TransactionReason.ADMIN_GIVE)
+				dbManager.addSkyEssenceToGroup(groupId, -currentEssence)
 			return false
 		}
 		dbManager.addSkyEssenceToGroup(groupId, -amount)
@@ -73,7 +75,17 @@ class SkyEssenceManager(private val plugin: Skya)
                     val totalGainForGroup = groupSources.values.sumOf { it.amountPerSecond }
 
                     if(totalGainForGroup > 0)
+					{
                         addEssence(groupId, totalGainForGroup, TransactionReason.PASSIVE_INCOME_TICK)
+					}
+
+//					Bukkit.getScheduler().runTask(plugin, Runnable {
+//						val scoreboard = Bukkit.getScoreboardManager().mainScoreboard
+//						val objective = scoreboard.getObjective("se") ?: return@Runnable
+//
+//						objective.getScore(dbManager.getGroupById(groupId)!!.name)
+//							.score = getEssence(groupId)
+//					})
                 }
             } catch (e : Exception) {
                 plugin.logger.severe("Error in SkyEssenceManager passive income loop: ${e.message}")

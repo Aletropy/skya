@@ -1,5 +1,6 @@
 package com.aletropy.skya.campfire
 
+import BalanceConfig
 import com.aletropy.skya.Skya
 import com.aletropy.skya.data.BoundCampfire
 import com.aletropy.skya.data.DatabaseManager
@@ -9,12 +10,11 @@ import com.aletropy.skya.events.BoundedCampfireEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
+import org.bukkit.Chunk
 import org.bukkit.Location
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.Display
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.TextDisplay
-import org.bukkit.persistence.PersistentDataType
 import java.text.NumberFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -30,19 +30,11 @@ data class CampfireDisplayData(
 
 class CampfireManager(private val plugin: Skya, private val dbManager: DatabaseManager)
 {
-
-	companion object
-	{
-		val CAMPFIRE_DISPLAY_KEY = NamespacedKey(Skya.PLUGIN_ID, "campfire_display_entity")
-	}
-
 	private val activeCampfires = ConcurrentHashMap<Location, CampfireDisplayData>()
 	private val numberFormatter: NumberFormat = NumberFormat.getInstance(Locale.US)
 
 	init
 	{
-		cleanupOldDisplays()
-
 		Bukkit.getScheduler().runTaskTimer(plugin, Runnable {
 			activeCampfires.forEach { (_, data) ->
 				data.displayedEssence += (data.incomePerSecond / 20.0)
@@ -75,20 +67,6 @@ class CampfireManager(private val plugin: Skya, private val dbManager: DatabaseM
 		}, 0L, 20L)
 	}
 
-	private fun cleanupOldDisplays() {
-		plugin.logger.info("Cleaning up old campfire displays...")
-		var count = 0
-		Bukkit.getWorlds().forEach { world ->
-			world.getEntitiesByClass(TextDisplay::class.java).forEach { display ->
-				if (display.persistentDataContainer.has(CAMPFIRE_DISPLAY_KEY)) {
-					display.remove()
-					count++
-				}
-			}
-		}
-		plugin.logger.info("Removed $count old campfire displays.")
-	}
-
 	private fun updateTextDisplays(data: CampfireDisplayData)
 	{
 		if (data.displays.size < 3) return
@@ -110,7 +88,12 @@ class CampfireManager(private val plugin: Skya, private val dbManager: DatabaseM
 		nameDisplay.text(Component.text("- ${data.groupName}'s Campfire -", NamedTextColor.namedColor(data.groupColor)))
 	}
 
-	private fun createTextDisplays(location: Location, groupId: Int)
+	fun createDisplaysForCampfire(location: Location, groupId: Int) {
+		if (activeCampfires.containsKey(location)) return
+		createTextDisplays(location, groupId)
+	}
+
+	fun createTextDisplays(location: Location, groupId: Int)
 	{
 		val group = dbManager.getGroupById(groupId) ?: return
 		val displayLocation = location.clone().add(0.5, 1.5, 0.5)
@@ -146,7 +129,17 @@ class CampfireManager(private val plugin: Skya, private val dbManager: DatabaseM
 		return (location.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay).apply {
 			this.text(Component.text(text))
 			this.billboard = Display.Billboard.CENTER
-			this.persistentDataContainer.set(CAMPFIRE_DISPLAY_KEY, PersistentDataType.BOOLEAN, true)
+            this.isPersistent = false
+		}
+	}
+
+	fun clearDisplaysFromChunk(chunk: Chunk) {
+		val locationsToRemove = activeCampfires.keys.filter {
+			it.world == chunk.world && it.chunk == chunk
+		}
+
+		locationsToRemove.forEach { location ->
+			activeCampfires.remove(location)
 		}
 	}
 
@@ -154,7 +147,8 @@ class CampfireManager(private val plugin: Skya, private val dbManager: DatabaseM
 	{
 		BoundedCampfireEvent(BoundCampfire(0, location, groupId)).callEvent()
 		createTextDisplays(location, groupId)
-		plugin.skyEssenceManager.registerPassiveSource(groupId, PassiveIncomeSource(location, 1))
+		plugin.skyEssenceManager.registerPassiveSource(groupId, PassiveIncomeSource(location,
+            BalanceConfig.getCampfireGen()))
 	}
 
 	fun removeCampfire(location: Location)
@@ -175,7 +169,8 @@ class CampfireManager(private val plugin: Skya, private val dbManager: DatabaseM
 	fun loadAllCampfires()
 	{
 		dbManager.getAllBoundCampfires().forEach { campfire ->
-			createTextDisplays(campfire.location, campfire.groupId)
+            if(campfire.location.isWorldLoaded && campfire.location.isChunkLoaded)
+			    createTextDisplays(campfire.location, campfire.groupId)
 			plugin.skyEssenceManager.registerPassiveSource(campfire.groupId, PassiveIncomeSource(campfire.location, 1))
 		}
 	}
